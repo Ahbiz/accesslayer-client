@@ -1,3 +1,4 @@
+// @ts-expect-error html2canvas missing types in package
 import html2canvas from 'html2canvas';
 
 export interface ImageCaptureResult {
@@ -22,7 +23,7 @@ export async function captureElementToPng(
 	const dataUrl = canvas.toDataURL('image/png');
 
 	const blob = await new Promise<Blob>((resolve, reject) => {
-		canvas.toBlob(b => {
+		canvas.toBlob((b: Blob | null) => {
 			if (b) {
 				resolve(b);
 			} else {

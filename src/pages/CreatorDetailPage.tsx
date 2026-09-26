@@ -50,6 +50,8 @@ import { Tooltip } from '@/components/ui/tooltip';
 import KeyDeprecationBanner from '@/components/common/KeyDeprecationBanner';
 import KeyBuybackModal from '@/components/common/KeyBuybackModal';
 import type { KeyBuybackReceipt } from '@/hooks/useKeyBuyback';
+import { usePerformanceBond } from '@/hooks/usePerformanceBond';
+import PerformanceBondPanel from '@/components/common/PerformanceBondPanel';
 
 function CreatorDetailPageContent() {
 	usePurchaseConfetti();
@@ -128,6 +130,15 @@ function CreatorDetailPageContent() {
 		source: oracleSource,
 		isLoading: isOracleLoading,
 	} = useKeyOraclePrice(id || '', { spotPriceStroops });
+
+	// Performance bond status for creator key protection (#975)
+	const {
+		data: performanceBondData,
+		isLoading: isPerformanceBondLoading,
+		isError: isPerformanceBondError,
+	} = usePerformanceBond(id || '');
+	const performanceBond =
+		performanceBondData ?? creator?.performanceBond ?? null;
 
 	// Track stale data indicator
 	const { shouldShowBadge, handleRefetch } = useCreatorProfileStaleIndicator(
@@ -328,6 +339,12 @@ function CreatorDetailPageContent() {
 					stats={keyStats}
 					isLoading={isKeyStatsLoading}
 					isError={isKeyStatsError}
+				/>
+				{/* Performance Bond Status Panel (#975) */}
+				<PerformanceBondPanel
+					bond={performanceBond}
+					isLoading={isPerformanceBondLoading}
+					isError={isPerformanceBondError}
 				/>
 				{/* Deprecation Notice and Buy Action on Key Detail Page */}
 				{isKeyDeprecated(creator) && (
