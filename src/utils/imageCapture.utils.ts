@@ -1,4 +1,3 @@
-// @ts-expect-error html2canvas missing types in package
 import html2canvas from 'html2canvas';
 
 export interface ImageCaptureResult {
