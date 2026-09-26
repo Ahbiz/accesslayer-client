@@ -59,6 +59,7 @@ export interface HeldKeyPosition extends BondingCurvePriceFields {
 	 * value is present here.
 	 */
 	nextBuyAllowedAt?: number | string | null;
+	costBasisStroops?: number | null;
 }
 
 export type PortfolioValueStatus = 'ready' | 'loading' | 'unavailable';
@@ -303,6 +304,33 @@ export function calculatePositionTotalValue(
 	}
 
 	return priceStroops * quantity;
+}
+
+function resolveCostBasisStroops(position: HeldKeyPosition): number | null {
+	const costBasisStroops = position.costBasisStroops;
+
+	if (
+		costBasisStroops == null ||
+		!Number.isFinite(costBasisStroops) ||
+		costBasisStroops < 0
+	) {
+		return null;
+	}
+
+	return costBasisStroops;
+}
+
+export function calculatePositionUnrealisedPnL(
+	position: HeldKeyPosition
+): number | null {
+	const currentValue = calculatePositionTotalValue(position);
+
+	if (currentValue == null) {
+		return null;
+	}
+
+	const costBasisStroops = resolveCostBasisStroops(position);
+	return currentValue - (costBasisStroops ?? currentValue);
 }
 
 /**

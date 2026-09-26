@@ -70,6 +70,10 @@ export const routes = [
 				element: <ProfilePage />,
 			},
 			{
+				path: '/profile/:wallet',
+				element: <ProfilePage />,
+			},
+			{
 				path: '/following',
 				element: <FollowingPage />,
 			},
