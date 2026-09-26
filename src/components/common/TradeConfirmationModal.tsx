@@ -215,10 +215,14 @@ export const TradeConfirmationModal: React.FC<TradeConfirmationModalProps> = ({
 
 					{/* Price Impact Warning if exceeds 5% */}
 					{priceImpactPercent != null &&
-						isHighPriceImpact(priceImpactPercent) && (
+						isHighPriceImpact(
+							priceImpactPercent,
+							slippageTolerancePercent
+						) && (
 							<div data-testid="confirmation-modal-impact-warning">
 								<PriceImpactWarning
 									impactPercent={priceImpactPercent}
+									threshold={slippageTolerancePercent}
 								/>
 							</div>
 						)}
