@@ -93,6 +93,10 @@ export const queryKeys = {
 		proposalVotes: (id: string) =>
 			['governance', 'proposal', id, 'votes'] as const,
 	},
+	mergeProposal: {
+		bySourceKey: (sourceKeyId: string) =>
+			['mergeProposal', 'source', sourceKeyId] as const,
+	},
 	staker: {
 		protocolRevenue: (wallet: string) =>
 			['staker', wallet, 'protocol-revenue'] as const,
