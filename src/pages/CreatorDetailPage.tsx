@@ -43,6 +43,7 @@ import { usePurchaseConfetti } from '@/hooks/usePurchaseConfetti';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useKeyTwap } from '@/hooks/useKeyTwap';
 import { useKeyStats } from '@/hooks/useKeyStats';
+import { useKeyUniqueTraders } from '@/hooks/useKeyUniqueTraders';
 import { useKeyConfig } from '@/hooks/useKeyConfig';
 import KeyStatsPanel from '@/components/common/KeyStatsPanel';
 import Skeleton from '@/components/ui/skeleton';
@@ -115,6 +116,8 @@ function CreatorDetailPageContent() {
 		isLoading: isKeyStatsLoading,
 		isError: isKeyStatsError,
 	} = useKeyStats(id || '');
+	const { data: uniqueTraders, isLoading: isUniqueTradersLoading } =
+		useKeyUniqueTraders(id || '');
 	// Live key config powers the bid-ask spread shown next to the buy
 	// action and inside the trade dialog (#951).
 	const { data: keyConfig, isLoading: isKeyConfigLoading } = useKeyConfig(
@@ -346,6 +349,8 @@ function CreatorDetailPageContent() {
 					stats={keyStats}
 					isLoading={isKeyStatsLoading}
 					isError={isKeyStatsError}
+					uniqueTraders={uniqueTraders}
+					isUniqueTradersLoading={isUniqueTradersLoading}
 				/>
 				{/* Performance Bond Status Panel (#975) */}
 				<PerformanceBondPanel
@@ -561,14 +566,15 @@ function CreatorDetailPageContent() {
 						creatorId={creator.id}
 						creatorTitle={creator.title || creator.name || 'Creator Key'}
 						holdingsCount={holdingsCount}
-						buybackPriceStroops={resolveCreatorKeyPriceStroops(creator) ?? 0}
+						buybackPriceStroops={
+							resolveCreatorKeyPriceStroops(creator) ?? 0
+						}
 						userAddress={userAddress}
 						onSettled={receipt => {
 							setRecentSettlement(receipt);
 						}}
 					/>
 				)}
-
 				{creator && (
 					<TradeDialog
 						open={buyDialogOpen}
