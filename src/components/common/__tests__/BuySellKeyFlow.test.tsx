@@ -18,6 +18,7 @@ const mockShowToast = vi.mocked(showToast);
 describe('BuySellKeyFlow (#919)', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		window.localStorage.clear();
 	});
 
 	it('renders buy/sell input panel with amount field and max button', () => {
@@ -104,6 +105,10 @@ describe('BuySellKeyFlow (#919)', () => {
 
 		expect(screen.getByTestId('price-impact-warning')).toBeInTheDocument();
 		expect(screen.getByTestId('price-impact-value')).toBeInTheDocument();
+		expect(
+			screen.getByTestId('price-impact-override-checkbox')
+		).toBeInTheDocument();
+		expect(screen.getByTestId('trade-review-button')).toBeDisabled();
 	});
 
 	it('does not show price impact warning when impact is within 5%', () => {
@@ -141,6 +146,9 @@ describe('BuySellKeyFlow (#919)', () => {
 
 		// Select 2% slippage tolerance
 		fireEvent.click(screen.getByTestId('slippage-preset-2'));
+		if (screen.queryByTestId('price-impact-override-checkbox')) {
+			fireEvent.click(screen.getByTestId('price-impact-override-checkbox'));
+		}
 
 		// Click review order button
 		fireEvent.click(screen.getByTestId('trade-review-button'));
@@ -178,6 +186,9 @@ describe('BuySellKeyFlow (#919)', () => {
 		fireEvent.change(amountInput, { target: { value: '3' } });
 
 		fireEvent.click(screen.getByTestId('slippage-preset-1'));
+		if (screen.queryByTestId('price-impact-override-checkbox')) {
+			fireEvent.click(screen.getByTestId('price-impact-override-checkbox'));
+		}
 		fireEvent.click(screen.getByTestId('trade-review-button'));
 
 		expect(
@@ -203,6 +214,7 @@ describe('BuySellKeyFlow (#919)', () => {
 				creatorName="Alex Rivers"
 				availableHoldings={10}
 				keyPriceStroops={1_000_000}
+				currentSupply={100}
 				protocolFeeBps={0}
 				creatorFeeBps={0}
 				onSubmitTrade={onSubmitTrade}
@@ -215,6 +227,9 @@ describe('BuySellKeyFlow (#919)', () => {
 
 		// Select 0.5% slippage
 		fireEvent.click(screen.getByTestId('slippage-preset-0.5'));
+		if (screen.queryByTestId('price-impact-override-checkbox')) {
+			fireEvent.click(screen.getByTestId('price-impact-override-checkbox'));
+		}
 
 		// Open confirmation modal
 		fireEvent.click(screen.getByTestId('trade-review-button'));
@@ -263,6 +278,7 @@ describe('BuySellKeyFlow (#919)', () => {
 				creatorName="Alex Rivers"
 				availableHoldings={10}
 				keyPriceStroops={1_000_000}
+				currentSupply={100}
 				initialSide="sell"
 				onSubmitTrade={onSubmitTrade}
 				onError={onError}
