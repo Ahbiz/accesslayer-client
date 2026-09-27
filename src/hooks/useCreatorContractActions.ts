@@ -12,15 +12,21 @@ import type { GraduatedCurveMilestone } from '@/components/common/GraduatedCurve
  * `set_launch_penalty`, `set_max_buy_quantity`, `set_quorum_bps` — #828,
  * `set_buy_cooldown` — #889).
  *
- * The on-chain wiring is not in the client yet, so each mutation simulates
- * signing latency and resolves. On success the creator detail query is
- * invalidated so the dashboard reflects the new state, and a toast confirms
- * the call.
+ * Each mutation simulates signing latency and resolves. On success the creator
+ * detail query is invalidated so the dashboard reflects the new state, and a
+ * toast confirms the call.
  */
 
 const SIGN_LATENCY_MS = 1200;
 
-async function submitContractCall(fn: string, args: unknown) {
+/**
+ * Signs and submits a creator contract call.
+ *
+ * The on-chain wiring is not in the client yet, so this simulates the signing
+ * latency and resolves. Exported so creator-facing mutations that live in their
+ * own hooks (e.g. key bundles) submit calls the same way.
+ */
+export async function submitCreatorContractCall(fn: string, args: unknown) {
 	// In production this signs and submits `fn` with `args` via the wallet.
 	void fn;
 	void args;
@@ -29,6 +35,8 @@ async function submitContractCall(fn: string, args: unknown) {
 	);
 	return { success: true as const };
 }
+
+const submitContractCall = submitCreatorContractCall;
 
 export interface AuctionConfigInput {
 	price: number;
