@@ -68,6 +68,7 @@ describe('CreatorDetailPage Buy Key Flow with slippage protection (#919)', () =>
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		window.localStorage.clear();
 		vi.mocked(useCreatorDetail).mockReturnValue({
 			data: mockCreator,
 			isLoading: false,
@@ -124,9 +125,13 @@ describe('CreatorDetailPage Buy Key Flow with slippage protection (#919)', () =>
 
 		const amountInput = await screen.findByTestId('trade-dialog-amount');
 		fireEvent.change(amountInput, { target: { value: '2' } });
+		await screen.findByTestId('buy-fee-breakdown');
 
 		// Select 1% slippage
 		fireEvent.click(screen.getByTestId('slippage-preset-1'));
+		if (screen.queryByTestId('price-impact-override-checkbox')) {
+			fireEvent.click(screen.getByTestId('price-impact-override-checkbox'));
+		}
 
 		// Confirm in dialog (with requireConfirmation=true, this opens confirmation modal)
 		fireEvent.click(screen.getByTestId('trade-dialog-confirm'));
