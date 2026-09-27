@@ -17,6 +17,7 @@ export const queryKeys = {
 	},
 	creators: {
 		all: ['creators'] as const,
+		prices: () => ['creators', 'prices'] as const,
 		list: (params?: GetCoursesParams) =>
 			['creators', 'list', params ?? null] as const,
 		infiniteList: (params?: Omit<GetCoursesParams, 'page'>) =>
@@ -56,6 +57,8 @@ export const queryKeys = {
 		activity: (address: string) => ['wallet', address, 'activity'] as const,
 		tradeHistory: (address: string) =>
 			['wallet', address, 'tradeHistory'] as const,
+		stakingPositions: (address: string) =>
+			['wallet', address, 'stakingPositions'] as const,
 	},
 	notifications: {
 		all: () => ['notifications'] as const,
