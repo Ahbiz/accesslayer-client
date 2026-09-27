@@ -42,18 +42,19 @@ import {
 	type FeeBreakdown,
 } from '@/utils/pricePreview.utils';
 import PriceImpactWarning from '@/components/common/PriceImpactWarning';
+import PriceImpactOverrideCheckbox from '@/components/common/PriceImpactOverrideCheckbox';
 import TradeConfirmationModal from '@/components/common/TradeConfirmationModal';
 import {
 	calculateTradePriceImpact,
-	PRICE_IMPACT_THRESHOLD_PERCENT,
+	isHighPriceImpact,
 } from '@/utils/priceImpact.utils';
 import {
-	DEFAULT_SLIPPAGE_TOLERANCE_PERCENT,
 	computeSlippageBounds,
 	type SlippageBounds,
 } from '@/utils/slippageTolerance.utils';
 import type { KeyConfig } from '@/services/course.service';
 import SpreadIndicator from '@/components/common/SpreadIndicator';
+import { useSlippageTolerancePreference } from '@/hooks/useSlippageTolerancePreference';
 
 export type TradeSide = 'buy' | 'sell';
 
@@ -121,9 +122,11 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 	const [pricePreview, setPricePreview] = useState<FeeBreakdown | null>(null);
 	const [previewLoading, setPreviewLoading] = useState(false);
 	const [previewError, setPreviewError] = useState<string | null>(null);
-	const [slippageTolerancePercent, setSlippageTolerancePercent] = useState(
-		DEFAULT_SLIPPAGE_TOLERANCE_PERCENT
-	);
+	const [slippageTolerancePercent, setSlippageTolerancePercent] =
+		useSlippageTolerancePreference();
+	const [acknowledgedImpactKey, setAcknowledgedImpactKey] = useState<
+		string | null
+	>(null);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const amountInputRef = useRef<HTMLInputElement | null>(null);
 	const pricePreviewFailureLogged = useRef(false);
@@ -146,7 +149,7 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 			setPricePreview(null);
 			setPreviewLoading(false);
 			setPreviewError(null);
-			setSlippageTolerancePercent(DEFAULT_SLIPPAGE_TOLERANCE_PERCENT);
+			setAcknowledgedImpactKey(null);
 			pricePreviewFailureLogged.current = false;
 		}
 	}, [open]);
@@ -339,6 +342,12 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 			currentSupply: currentSupply ?? 0,
 		});
 	}, [amountValid, parsedAmount, side, currentSupply]);
+	const impactWarningActive =
+		amountValid &&
+		isHighPriceImpact(priceImpactPercent, slippageTolerancePercent);
+	const impactAcknowledgementKey = `${side}:${parsedAmount}:${currentSupply ?? 0}:${slippageTolerancePercent}`;
+	const impactAcknowledged =
+		acknowledgedImpactKey === impactAcknowledgementKey;
 
 	const handleMaxClick = () => {
 		setTouched(true);
@@ -615,9 +624,19 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 						)}
 						<PriceImpactWarning
 							impactPercent={priceImpactPercent}
-							threshold={PRICE_IMPACT_THRESHOLD_PERCENT}
+							threshold={slippageTolerancePercent}
 							className="mt-2"
 						/>
+						{impactWarningActive && (
+							<PriceImpactOverrideCheckbox
+								checked={impactAcknowledged}
+								onChange={checked =>
+									setAcknowledgedImpactKey(
+										checked ? impactAcknowledgementKey : null
+									)
+								}
+							/>
+						)}
 					</div>
 				)}
 			</div>
@@ -639,6 +658,7 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 			<Button
 				type="button"
 				onClick={() => {
+					if (impactWarningActive && !impactAcknowledged) return;
 					if (requireConfirmation) {
 						setConfirmationOpen(true);
 					} else {
@@ -648,6 +668,7 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 				disabled={
 					!amountValid ||
 					isSubmitting ||
+					(impactWarningActive && !impactAcknowledged) ||
 					(side === 'buy' && (previewLoading || previewError != null))
 				}
 				aria-busy={isSubmitting || undefined}
@@ -678,6 +699,7 @@ const TradeDialog: React.FC<TradeDialogProps> = ({
 			minPriceStroops={slippageBounds?.minPriceStroops ?? null}
 			priceImpactPercent={priceImpactPercent}
 			onConfirm={async () => {
+				if (impactWarningActive && !impactAcknowledged) return;
 				await onConfirm(parsedAmount, pricePreview, slippageBounds);
 				setConfirmationOpen(false);
 			}}

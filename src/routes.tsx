@@ -15,6 +15,7 @@ import GovernancePage from './pages/GovernancePage';
 import ProposalDetailPage from './pages/ProposalDetailPage';
 import ReferralDashboardPage from './pages/ReferralDashboardPage';
 import CreateCreatorKeyPage from './pages/CreateCreatorKeyPage';
+import BundleManagementPage from './pages/BundleManagementPage';
 
 export const routes = [
 	{
@@ -62,11 +63,23 @@ export const routes = [
 				element: <CreatorDashboardPage />,
 			},
 			{
+				path: '/creator/:id/bundles',
+				element: <BundleManagementPage />,
+			},
+			{
+				path: '/creators/:id/bundles',
+				element: <BundleManagementPage />,
+			},
+			{
 				path: '/notifications',
 				element: <NotificationsPage />,
 			},
 			{
 				path: '/profile',
+				element: <ProfilePage />,
+			},
+			{
+				path: '/profile/:wallet',
 				element: <ProfilePage />,
 			},
 			{
