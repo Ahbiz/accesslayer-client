@@ -7,16 +7,16 @@ import {
 } from '@/utils/keyPriceDisplay.utils';
 import SlippageToleranceSelector from '@/components/common/SlippageToleranceSelector';
 import PriceImpactWarning from '@/components/common/PriceImpactWarning';
+import PriceImpactOverrideCheckbox from '@/components/common/PriceImpactOverrideCheckbox';
 import TradeConfirmationModal from '@/components/common/TradeConfirmationModal';
 import LaunchPenaltyWarning from '@/components/common/LaunchPenaltyWarning';
 import {
-	DEFAULT_SLIPPAGE_TOLERANCE_PERCENT,
 	computeSlippageBounds,
 	type SlippageBounds,
 } from '@/utils/slippageTolerance.utils';
 import {
 	calculateTradePriceImpact,
-	PRICE_IMPACT_THRESHOLD_PERCENT,
+	isHighPriceImpact,
 } from '@/utils/priceImpact.utils';
 import { calculateLaunchPenalty } from '@/utils/launchPenalty.utils';
 import {
@@ -30,6 +30,7 @@ import type { KeyConfig } from '@/services/course.service';
 import SpreadIndicator from '@/components/common/SpreadIndicator';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { useSlippageTolerancePreference } from '@/hooks/useSlippageTolerancePreference';
 
 export interface BuySellTradeParams {
 	creatorId?: string;
@@ -100,7 +101,10 @@ export const BuySellKeyFlow: React.FC<BuySellKeyFlowProps> = ({
 	const [amountText, setAmountText] = useState('1');
 	const [touched, setTouched] = useState(false);
 	const [slippageTolerancePercent, setSlippageTolerancePercent] =
-		useState<number>(DEFAULT_SLIPPAGE_TOLERANCE_PERCENT);
+		useSlippageTolerancePreference();
+	const [acknowledgedImpactKey, setAcknowledgedImpactKey] = useState<
+		string | null
+	>(null);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [internalSubmitting, setInternalSubmitting] = useState(false);
 
@@ -215,6 +219,12 @@ export const BuySellKeyFlow: React.FC<BuySellKeyFlowProps> = ({
 			currentSupply: currentSupply ?? 0,
 		});
 	}, [isValid, parsedAmount, side, currentSupply]);
+	const impactWarningActive =
+		isValid &&
+		isHighPriceImpact(priceImpactPercent, slippageTolerancePercent);
+	const impactAcknowledgementKey = `${side}:${parsedAmount}:${currentSupply ?? 0}:${slippageTolerancePercent}`;
+	const impactAcknowledged =
+		acknowledgedImpactKey === impactAcknowledgementKey;
 
 	// Early sell launch penalty
 	const launchPenalty = useMemo(() => {
@@ -234,12 +244,13 @@ export const BuySellKeyFlow: React.FC<BuySellKeyFlowProps> = ({
 	// Open confirmation modal
 	const handleReviewOrder = () => {
 		setTouched(true);
-		if (!isValid) return;
+		if (!isValid || (impactWarningActive && !impactAcknowledged)) return;
 		setConfirmationOpen(true);
 	};
 
 	// Final submission
 	const handleConfirmSubmission = async () => {
+		if (impactWarningActive && !impactAcknowledged) return;
 		setInternalSubmitting(true);
 		const tradeParams: BuySellTradeParams = {
 			creatorId,
@@ -461,17 +472,31 @@ export const BuySellKeyFlow: React.FC<BuySellKeyFlowProps> = ({
 				/>
 			</div>
 
-			{/* Price Impact Warning when impact exceeds 5% */}
+			{/* Price impact warning when impact exceeds the selected tolerance */}
 			<PriceImpactWarning
 				impactPercent={priceImpactPercent}
-				threshold={PRICE_IMPACT_THRESHOLD_PERCENT}
+				threshold={slippageTolerancePercent}
 			/>
+			{impactWarningActive && (
+				<PriceImpactOverrideCheckbox
+					checked={impactAcknowledged}
+					onChange={checked =>
+						setAcknowledgedImpactKey(
+							checked ? impactAcknowledgementKey : null
+						)
+					}
+				/>
+			)}
 
 			{/* Review / Proceed to Confirmation Button */}
 			<Button
 				type="button"
 				onClick={handleReviewOrder}
-				disabled={!isValid || isSubmitting}
+				disabled={
+					!isValid ||
+					isSubmitting ||
+					(impactWarningActive && !impactAcknowledged)
+				}
 				data-testid="trade-review-button"
 				className={cn(
 					'w-full rounded-xl py-3 font-bold text-sm shadow-md transition-all',

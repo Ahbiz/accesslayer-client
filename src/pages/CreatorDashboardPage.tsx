@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { useAccount } from 'wagmi';
 import { useCreatorDetail } from '@/hooks/useCreators';
 import { CreatorDashboardSkeleton } from '@/components/common/CreatorSkeleton';
@@ -12,6 +12,7 @@ import GraduatedCurvePanel from '@/components/common/GraduatedCurvePanel';
 import BuyCooldownPanel from '@/components/common/BuyCooldownPanel';
 import DeprecateKeyPanel from '@/components/common/DeprecateKeyPanel';
 import VestingSchedulePanel from '@/components/common/VestingSchedulePanel';
+import CurveMigrationPanel from '@/components/common/CurveMigrationPanel';
 import { AlertTriangle } from 'lucide-react';
 import {
 	useCancelAuctionMutation,
@@ -24,8 +25,10 @@ import {
 	useSetBuyCooldownMutation,
 	useDeprecateKeyMutation,
 	useClaimVestedTokensMutation,
+	useExecuteCurveMigrationMutation,
 } from '@/hooks/useCreatorContractActions';
 import { useKeyVesting, useKeyVestingClaims } from '@/hooks/useKeyVesting';
+import { useCurveMigrations } from '@/hooks/useCurveMigrations';
 import { isOwnWallet } from '@/utils/isOwnWallet';
 import {
 	formatDisplayKeyPrice,
@@ -84,6 +87,16 @@ export default function CreatorDashboardPage() {
 		address ?? ''
 	);
 
+	// Curve migrations change the pricing every holder buys at, so the panel is
+	// creator-only for the same reason the vesting schedule is: the query stays
+	// disabled and nothing is rendered for anyone but the key's creator.
+	const {
+		data: curveMigrations = [],
+		isLoading: isCurveMigrationsLoading,
+		isError: isCurveMigrationsError,
+	} = useCurveMigrations(isKeyCreator ? id : undefined);
+	const executeCurveMigration = useExecuteCurveMigrationMutation(id);
+
 	const setTab = (value: string) => {
 		setSearchParams(
 			prev => {
@@ -134,6 +147,13 @@ export default function CreatorDashboardPage() {
 					<p className="mt-2 text-sm text-white/50">
 						Manage your key profile and auction configuration.
 					</p>
+					<Link
+						to={`/creator/${id}/bundles`}
+						className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-300 underline-offset-4 hover:text-amber-200 hover:underline"
+						data-testid="creator-dashboard-bundles-link"
+					>
+						Manage key bundles
+					</Link>
 				</div>
 
 				{creator.deprecated && (
@@ -411,13 +431,43 @@ export default function CreatorDashboardPage() {
 								Set the minimum percentage of holders that must
 								participate in a vote for a proposal to pass.
 							</p>
-							<QuorumSettingsPanel
-								quorumBps={creator.quorumBps}
-								isSubmitting={setQuorumBps.isPending}
-								onSubmit={quorumBps => setQuorumBps.mutate(quorumBps)}
+						<QuorumSettingsPanel
+							quorumBps={creator.quorumBps}
+							isSubmitting={setQuorumBps.isPending}
+							onSubmit={quorumBps => setQuorumBps.mutate(quorumBps)}
+						/>
+					</section>
+
+					{/* Curve migration management — creator wallets only */}
+					{isKeyCreator && (
+						<section
+							className={CARD_CLASS}
+							data-testid="curve-migration-section"
+						>
+							<h2 className="mb-1 font-grotesque text-xl font-black tracking-tight">
+								Curve Migrations
+							</h2>
+							<p className="mb-6 text-sm text-white/50">
+								Review pending bonding-curve changes, follow the timelock
+								and holder vote, then execute a migration once both
+								conditions are met.
+							</p>
+							<CurveMigrationPanel
+								migrations={curveMigrations}
+								isLoading={isCurveMigrationsLoading}
+								isError={isCurveMigrationsError}
+								executingMigrationId={
+									executeCurveMigration.isPending
+										? (executeCurveMigration.variables ?? null)
+										: null
+								}
+								onExecute={migrationId =>
+									executeCurveMigration.mutate(migrationId)
+								}
 							/>
 						</section>
-					</div>
+					)}
+				</div>
 				)}
 			</div>
 		</main>

@@ -17,6 +17,7 @@ import ReferralDashboardPage from './pages/ReferralDashboardPage';
 import CreateCreatorKeyPage from './pages/CreateCreatorKeyPage';
 import AtomicSwapCreatePage from './pages/AtomicSwapCreatePage';
 import AtomicSwapProposalPage from './pages/AtomicSwapProposalPage';
+import BundleManagementPage from './pages/BundleManagementPage';
 
 export const routes = [
 	{
@@ -64,11 +65,23 @@ export const routes = [
 				element: <CreatorDashboardPage />,
 			},
 			{
+				path: '/creator/:id/bundles',
+				element: <BundleManagementPage />,
+			},
+			{
+				path: '/creators/:id/bundles',
+				element: <BundleManagementPage />,
+			},
+			{
 				path: '/notifications',
 				element: <NotificationsPage />,
 			},
 			{
 				path: '/profile',
+				element: <ProfilePage />,
+			},
+			{
+				path: '/profile/:wallet',
 				element: <ProfilePage />,
 			},
 			{

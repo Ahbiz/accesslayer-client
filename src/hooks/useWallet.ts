@@ -7,12 +7,13 @@ import { useKeyCostBasis } from '@/hooks/useKeyCostBasis';
 import showToast from '@/utils/toast.util';
 import { getSignatureErrorMessage } from '@/utils/errorHandling.utils';
 import { fetchWalletActivityPage } from '@/services/walletActivity.service';
+import { fetchWalletHoldings } from '@/services/wallet.service';
 import { fetchTradeHistoryPage } from '@/services/tradeHistory.service';
 
 export function useWalletHoldings(address: string) {
 	return useQuery<HeldKeyPosition[]>({
 		queryKey: queryKeys.wallet.holdings(address),
-		queryFn: async () => [],
+		queryFn: () => fetchWalletHoldings(address),
 		enabled: !!address,
 	});
 }
@@ -611,6 +612,9 @@ export function useClaimStakeMutation(address: string) {
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.wallet.holdings(address),
+			});
+			queryClient.invalidateQueries({
+				queryKey: queryKeys.wallet.stakingPositions(address),
 			});
 			showToast.success('Stake claimed');
 		},

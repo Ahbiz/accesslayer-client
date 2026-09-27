@@ -17,6 +17,7 @@ export const queryKeys = {
 	},
 	creators: {
 		all: ['creators'] as const,
+		prices: () => ['creators', 'prices'] as const,
 		list: (params?: GetCoursesParams) =>
 			['creators', 'list', params ?? null] as const,
 		infiniteList: (params?: Omit<GetCoursesParams, 'page'>) =>
@@ -28,10 +29,11 @@ export const queryKeys = {
 			['creators', creatorId, 'activity'] as const,
 		twap: (creatorId: string) =>
 			['creators', creatorId, 'twap', '24h'] as const,
-		stats: (creatorId: string) =>
-			['creators', creatorId, 'stats'] as const,
+		stats: (creatorId: string) => ['creators', creatorId, 'stats'] as const,
 		curveConfig: (creatorId: string) =>
 			['creators', creatorId, 'curve-config'] as const,
+		curveMigrations: (creatorId: string) =>
+			['creators', creatorId, 'curve-migrations'] as const,
 		buyback: (creatorId: string) =>
 			['creators', creatorId, 'buyback'] as const,
 		keyConfig: (creatorId: string) =>
@@ -55,6 +57,8 @@ export const queryKeys = {
 		activity: (address: string) => ['wallet', address, 'activity'] as const,
 		tradeHistory: (address: string) =>
 			['wallet', address, 'tradeHistory'] as const,
+		stakingPositions: (address: string) =>
+			['wallet', address, 'stakingPositions'] as const,
 	},
 	notifications: {
 		all: () => ['notifications'] as const,
@@ -68,6 +72,7 @@ export const queryKeys = {
 		all: () => ['leaderboard'] as const,
 		volume: (window: VolumeWindow = '24h') =>
 			['leaderboard', 'volume', window] as const,
+                ratings: () => ['leaderboard', 'ratings'] as const,
 	},
 	admin: {
 		oracleCallers: () => ['admin', 'oracle', 'callers'] as const,
@@ -79,6 +84,10 @@ export const queryKeys = {
 		proposals: (creatorId?: string) =>
 			['governance', 'proposals', creatorId ?? null] as const,
 		proposal: (id: string) => ['governance', 'proposal', id] as const,
+		snapshot: (proposalId: string, voter: string) =>
+			['governance', 'proposal', proposalId, 'snapshot', voter] as const,
+		vote: (proposalId: string) =>
+			['governance', 'proposal', proposalId, 'vote'] as const,
 		proposalVotes: (id: string) =>
 			['governance', 'proposal', id, 'votes'] as const,
 	},
@@ -97,9 +106,14 @@ export const queryKeys = {
 	},
 	atomicSwap: {
 		all: () => ['atomic-swap'] as const,
-		proposal: (proposalId: string) => ['atomic-swap', 'proposal', proposalId] as const,
+		proposal: (proposalId: string) =>
+			['atomic-swap', 'proposal', proposalId] as const,
 		proposals: (address: string, status?: string) =>
 			['atomic-swap', 'proposals', address, status ?? 'all'] as const,
 		history: (address: string) => ['atomic-swap', 'history', address] as const,
+	},
+	bundles: {
+		all: (creatorId: string) => ['bundles', creatorId] as const,
+		list: (creatorId: string) => ['bundles', creatorId, 'list'] as const,
 	},
 } as const;
