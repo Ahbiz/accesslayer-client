@@ -30,6 +30,8 @@ export const queryKeys = {
 		twap: (creatorId: string) =>
 			['creators', creatorId, 'twap', '24h'] as const,
 		stats: (creatorId: string) => ['creators', creatorId, 'stats'] as const,
+		uniqueTraders: (creatorId: string) =>
+			['creators', creatorId, 'unique-traders'] as const,
 		curveConfig: (creatorId: string) =>
 			['creators', creatorId, 'curve-config'] as const,
 		curveMigrations: (creatorId: string) =>
@@ -74,7 +76,7 @@ export const queryKeys = {
 		all: () => ['leaderboard'] as const,
 		volume: (window: VolumeWindow = '24h') =>
 			['leaderboard', 'volume', window] as const,
-                ratings: () => ['leaderboard', 'ratings'] as const,
+		ratings: () => ['leaderboard', 'ratings'] as const,
 	},
 	admin: {
 		oracleCallers: () => ['admin', 'oracle', 'callers'] as const,
@@ -116,7 +118,8 @@ export const queryKeys = {
 			['atomic-swap', 'proposal', proposalId] as const,
 		proposals: (address: string, status?: string) =>
 			['atomic-swap', 'proposals', address, status ?? 'all'] as const,
-		history: (address: string) => ['atomic-swap', 'history', address] as const,
+		history: (address: string) =>
+			['atomic-swap', 'history', address] as const,
 	},
 	bundles: {
 		all: (creatorId: string) => ['bundles', creatorId] as const,

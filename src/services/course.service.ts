@@ -301,6 +301,17 @@ export interface KeyStats {
 	twap24h: number | null;
 }
 
+/**
+ * Unique trader count for a creator key (#1020): distinct wallets that have
+ * bought or sold the key at least once.
+ */
+export interface KeyUniqueTraders {
+	/** Current all-time unique trader count. */
+	uniqueTraders: number | null;
+	/** Unique trader count as of 24 hours ago, used for the trend indicator. */
+	uniqueTraders24hAgo: number | null;
+}
+
 class CourseService extends BaseApiService {
 	private readonly PROFILE_CACHE_TTL = 30000; // 30 seconds
 
@@ -429,6 +440,18 @@ class CourseService extends BaseApiService {
 		}
 	}
 
+	// Get the unique trader count - GET /keys/:keyId/unique-traders
+	async getKeyUniqueTraders(keyId: string): Promise<KeyUniqueTraders> {
+		try {
+			const response = await this.api.get<APIResponse<KeyUniqueTraders>>(
+				`/keys/${keyId}/unique-traders`
+			);
+			return response.data.data;
+		} catch (error) {
+			throw this.handleError(error);
+		}
+	}
+
 	// Get enrolled courses - GET /courses/enrolled
 	async getEnrolledCourses(): Promise<Course[]> {
 		try {
@@ -533,10 +556,9 @@ class CourseService extends BaseApiService {
 		quantity: number
 	): Promise<Record<string, number>> {
 		try {
-			const response = await this.api.get<APIResponse<Record<string, number>>>(
-				`/keys/${keyId}/simulate`,
-				{ params: { quantity } }
-			);
+			const response = await this.api.get<
+				APIResponse<Record<string, number>>
+			>(`/keys/${keyId}/simulate`, { params: { quantity } });
 			return response.data.data;
 		} catch (error) {
 			throw this.handleError(error);
