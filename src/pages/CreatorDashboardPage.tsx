@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { useAccount } from 'wagmi';
 import { useCreatorDetail } from '@/hooks/useCreators';
 import { CreatorDashboardSkeleton } from '@/components/common/CreatorSkeleton';
@@ -134,6 +134,13 @@ export default function CreatorDashboardPage() {
 					<p className="mt-2 text-sm text-white/50">
 						Manage your key profile and auction configuration.
 					</p>
+					<Link
+						to={`/creator/${id}/bundles`}
+						className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-300 underline-offset-4 hover:text-amber-200 hover:underline"
+						data-testid="creator-dashboard-bundles-link"
+					>
+						Manage key bundles
+					</Link>
 				</div>
 
 				{creator.deprecated && (

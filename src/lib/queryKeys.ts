@@ -95,4 +95,8 @@ export const queryKeys = {
 		summary: (wallet: string) => ['referrals', wallet, 'summary'] as const,
 		wallets: (wallet: string) => ['referrals', wallet, 'wallets'] as const,
 	},
+	bundles: {
+		all: (creatorId: string) => ['bundles', creatorId] as const,
+		list: (creatorId: string) => ['bundles', creatorId, 'list'] as const,
+	},
 } as const;
