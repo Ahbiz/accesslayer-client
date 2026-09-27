@@ -44,6 +44,8 @@ export const queryKeys = {
 			['creators', creatorId, 'vesting', 'claims', wallet] as const,
 		oraclePrice: (creatorId: string) =>
 			['creators', creatorId, 'oracle-price'] as const,
+		performanceBond: (creatorId: string) =>
+			['creators', creatorId, 'performance-bond'] as const,
 		keyDeployment: (keyId: string) =>
 			['creators', 'deployment', keyId] as const,
 		discovery: {
@@ -107,6 +109,14 @@ export const queryKeys = {
 		all: () => ['referrals'] as const,
 		summary: (wallet: string) => ['referrals', wallet, 'summary'] as const,
 		wallets: (wallet: string) => ['referrals', wallet, 'wallets'] as const,
+	},
+	atomicSwap: {
+		all: () => ['atomic-swap'] as const,
+		proposal: (proposalId: string) =>
+			['atomic-swap', 'proposal', proposalId] as const,
+		proposals: (address: string, status?: string) =>
+			['atomic-swap', 'proposals', address, status ?? 'all'] as const,
+		history: (address: string) => ['atomic-swap', 'history', address] as const,
 	},
 	bundles: {
 		all: (creatorId: string) => ['bundles', creatorId] as const,
