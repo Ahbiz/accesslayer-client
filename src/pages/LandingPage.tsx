@@ -2109,6 +2109,7 @@ function LandingPage() {
 					currentLedger={featuredCreator?.currentLedger}
 					launchPenaltyBps={featuredCreator?.launchPenaltyBps}
 					maxBuyQuantity={featuredCreator?.maxBuyQuantity ?? null}
+					holdingCap={featuredCreator?.holdingCap ?? featuredCreator?.maxHoldingCap ?? null}
 					keyConfig={featuredKeyConfig}
 					isKeyConfigLoading={isFeaturedKeyConfigLoading}
 					isSubmitting={tradeSubmitting}
